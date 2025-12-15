@@ -81,6 +81,31 @@ class Value:
         self.grad = 1
         for v in reversed(topo):
             v._backward()
+    #  Metodos para la parte 2
+    def tanh(self):
+        x = self.data
+        t = (math.exp(2*x) - 1) / (math.exp(2*x) + 1)
+        out = Value(t, (self,), 'tanh')
+
+        def _backward():
+            # Derivada de tanh: 1 - tanh(x)^2
+            self.grad += (1 - t**2) * out.grad
+        out._backward = _backward
+
+        return out
+
+    def sigmoid(self):
+        x = self.data
+        # Sigmoid: 1 / (1 + e^-x)
+        s = 1 / (1 + math.exp(-x))
+        out = Value(s, (self,), 'sigmoid')
+
+        def _backward():
+            # Derivada de sigmoid: sigmoid(x) * (1 - sigmoid(x)). Equivalente algebraicamente a e^x / (1+e^-x)^2
+            self.grad += (s * (1 - s)) * out.grad
+        out._backward = _backward
+
+        return out
 
     def __neg__(self): # -self
         return self * -1
